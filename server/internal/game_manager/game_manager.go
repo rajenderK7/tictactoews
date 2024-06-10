@@ -37,13 +37,8 @@ func (gm *GameManager) NewGame(ws *websocket.Conn) {
 		newPlayer := game.NewPlayer(ws, MarkO)
 		newGame := game.NewGame(gm.waitingPlayer, newPlayer)
 		gm.waitingPlayer = nil
-		// gm.addGame(newGame)
 		newGame.Player1.SendMessage(game.NewMessage(nil, utils.START, newGame.Player1.Mark))
 		newGame.Player2.SendMessage(game.NewMessage(nil, utils.START, newGame.Player2.Mark))
 		go newGame.Start()
 	}
 }
-
-// func (gm *GameManager) addGame(game *game.Game) {
-// 	gm.games = append(gm.games, game)
-// }

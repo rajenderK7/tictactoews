@@ -2,6 +2,7 @@ package utils
 
 const (
 	// Game states
+	OK                        = "OK"
 	START                     = "START"
 	DRAW                      = "DRAW"
 	GAME_OVER                 = "GAME OVER"
