@@ -1,83 +1,153 @@
 package game
 
 import (
+	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/gorilla/websocket"
 	"github.com/rajenderK7/tictacgo"
+	"github.com/rajenderK7/tictactoews/internal/utils"
 )
 
-type move struct {
-	player        *websocket.Conn
-	markAndCoords []byte
+type Message struct {
+	Player  *Player `json:"-"`
+	Type    string  `json:"type"`
+	Payload string  `json:"payload,omitempty"`
+}
+
+func NewMessage(player *Player, t string, payload string) *Message {
+	return &Message{
+		Player:  player,
+		Type:    t,
+		Payload: payload,
+	}
 }
 
 type Game struct {
-	game    *tictacgo.Game
-	Player1 *websocket.Conn
-	Player2 *websocket.Conn
-	MovesCh chan move
+	game      *tictacgo.Game
+	Player1   *Player
+	Player2   *Player
+	MessageCh chan Message
 }
 
-func NewGame(player1, player2 *websocket.Conn) *Game {
+func NewGame(player1, player2 *Player) *Game {
 	return &Game{
-		game:    tictacgo.New(3),
-		Player1: player1,
-		Player2: player2,
-		MovesCh: make(chan move, 10),
+		game:      tictacgo.New(3),
+		Player1:   player1,
+		Player2:   player2,
+		MessageCh: make(chan Message, 5),
 	}
 }
 
 // Start will start listening to the websocket connections.
+// The function will return when one of the players disconnects.
 func (g *Game) Start() error {
-	go readMessages(g.Player1, g.MovesCh)
-	go readMessages(g.Player2, g.MovesCh)
+	go readMessages(g.Player1, g.MessageCh)
+	go readMessages(g.Player2, g.MessageCh)
+	defer g.endGame()
 
-	for move := range g.MovesCh {
-		markAndCoords := strings.Split(string(move.markAndCoords), "")
-		mark := markAndCoords[0]
-		row, err := strconv.ParseInt(markAndCoords[0], 10, 32)
-		if err != nil {
-			continue
-		}
-		col, err := strconv.ParseInt(markAndCoords[1], 10, 32)
-		if err != nil {
-			continue
-		}
-		res, err := g.game.Play(mark, int(row), int(col))
-		if err != nil {
-			continue
-		}
-		if len(res.Winner) > 0 {
-			winner := WINNER + " " + res.Winner
-			g.Player1.WriteMessage(websocket.TextMessage, []byte(winner))
-			g.Player2.WriteMessage(websocket.TextMessage, []byte(winner))
-			break
-		} else if res.IsDraw {
-			g.Player1.WriteMessage(websocket.TextMessage, []byte(DRAW))
-			g.Player2.WriteMessage(websocket.TextMessage, []byte(DRAW))
-			break
-		} else if move.player == g.Player1 {
-			g.Player2.WriteMessage(websocket.TextMessage, move.markAndCoords)
-		} else {
-			g.Player1.WriteMessage(websocket.TextMessage, move.markAndCoords)
+	for msg := range g.MessageCh {
+		switch msg.Type {
+		case utils.MOVE:
+			{
+				coords := strings.Split(msg.Payload, " ")
+
+				row, col, err := parseCoords(coords)
+				if err != nil {
+					msg.Player.SendMessage(NewMessage(nil, utils.ERROR, err.Error()))
+					continue
+				}
+
+				res, err := g.game.Play(msg.Player.Mark, row, col)
+				if err != nil {
+					msg.Player.SendMessage(NewMessage(nil, utils.ERROR, err.Error()))
+					continue
+				}
+
+				if len(res.Winner) > 0 {
+					message := NewMessage(nil, utils.GAME_OVER, utils.WINNER_TITLE+" "+res.Winner)
+					g.Player1.SendMessage(message)
+					g.Player2.SendMessage(message)
+					return nil
+				} else if res.IsDraw {
+					message := NewMessage(nil, utils.GAME_OVER, utils.DRAW)
+					g.Player1.SendMessage(message)
+					g.Player2.SendMessage(message)
+					return nil
+				} else if msg.Player == g.Player1 {
+					message := NewMessage(nil, utils.MOVE, msg.Payload)
+					g.Player2.SendMessage(message)
+				} else {
+					message := NewMessage(nil, utils.MOVE, msg.Payload)
+					g.Player1.SendMessage(message)
+				}
+			}
+
+		case utils.DISCONNECTED:
+			{
+				message := NewMessage(nil, utils.GAME_OVER, utils.OPPONENT_DISCONNECTED_WIN)
+
+				if msg.Player == g.Player1 {
+					g.Player2.SendMessage(message)
+				} else {
+					g.Player1.SendMessage(message)
+				}
+
+				return nil
+			}
 		}
 	}
 	return nil
 }
 
-func readMessages(ws *websocket.Conn, movesCh chan move) {
-	defer ws.Close()
+func (g *Game) endGame() {
+	if g.Player1 != nil {
+		g.Player1.CloseWS()
+	}
+	if g.Player2 != nil {
+		g.Player2.CloseWS()
+	}
+	<-g.MessageCh
+	<-g.MessageCh
+	close(g.MessageCh)
+}
+
+func readMessages(player *Player, ch chan Message) {
+	defer func() {
+		if ch != nil {
+			ch <- *NewMessage(player, utils.DISCONNECTED, "")
+		}
+	}()
+
 	for {
-		_, msg, err := ws.ReadMessage()
+		_, msg, err := player.ws.ReadMessage()
 		if err != nil {
 			return
 		}
 
-		movesCh <- move{
-			player:        ws,
-			markAndCoords: msg,
+		var message Message
+		err = json.Unmarshal(msg, &message)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
 		}
+
+		// Assigning the player explicitly is required
+		// because we are not passing Player from the client.
+		message.Player = player
+		ch <- message
 	}
+}
+
+func parseCoords(coords []string) (int, int, error) {
+	row, err := strconv.ParseInt(coords[0], 10, 32)
+	if err != nil {
+		return -1, -1, err
+	}
+	col, err := strconv.ParseInt(coords[1], 10, 32)
+	if err != nil {
+		return -1, -1, err
+	}
+	return int(row), int(col), err
 }

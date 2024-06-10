@@ -13,8 +13,8 @@ github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWE
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/rajenderK7/tictacgo v0.0.0-20240608102717-18452792de74 h1:/iH6NsBnWRB34h6T+KO6G6NgiaNMxtJ9J0AHK55SeEA=
-github.com/rajenderK7/tictacgo v0.0.0-20240608102717-18452792de74/go.mod h1:UyOk8cD8+NQZBexTI7FAb7jatdfoadP9akrRBa8WOLU=
+github.com/rajenderK7/tictacgo v0.0.0-20240608105817-df6a3d9fe885 h1:RsUk3zZS0HvY415OOqxIUR+BmwaCOaOhplXSyElHzws=
+github.com/rajenderK7/tictacgo v0.0.0-20240608105817-df6a3d9fe885/go.mod h1:UyOk8cD8+NQZBexTI7FAb7jatdfoadP9akrRBa8WOLU=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=

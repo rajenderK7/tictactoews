@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
+	gamemanager "github.com/rajenderK7/tictactoews/internal/game_manager"
 )
 
 var (
@@ -17,6 +17,8 @@ var (
 	}
 )
 
+var gm = gamemanager.New()
+
 func main() {
 	e := echo.New()
 
@@ -26,22 +28,9 @@ func main() {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
-		fmt.Println("New ws connection")
-		// Echo back the messages to the client.
-		for {
-			msgType, msg, err := ws.ReadMessage()
-			if err != nil {
-				// Connection might have been closed.
-				break
-			}
-
-			err = ws.WriteMessage(msgType, msg)
-			if err != nil {
-				break
-			}
-		}
+		gm.NewGame(ws)
 		return nil
 	})
 
-	e.Start(":4000")
+	e.Start("localhost:4000")
 }
