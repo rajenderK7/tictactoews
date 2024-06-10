@@ -5,7 +5,7 @@ go 1.22.2
 require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/labstack/echo/v4 v4.12.0
-	github.com/rajenderK7/tictacgo v0.0.0-20240608105817-df6a3d9fe885
+	github.com/rajenderK7/tictacgo v0.0.0-20240610170423-7a3b8fc2b035
 )
 
 require (
