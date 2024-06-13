@@ -40,8 +40,8 @@ func NewGame(player1, player2 *Player) *Game {
 	}
 }
 
-// Start will start listening to the websocket connections.
-// The function will return when one of the players disconnects.
+// Start will listen to the websocket connections.
+// The function returns when one of the players disconnect.
 func (g *Game) Start() error {
 	go readMessages(g.Player1, g.MessageCh)
 	go readMessages(g.Player2, g.MessageCh)
@@ -65,22 +65,18 @@ func (g *Game) Start() error {
 					continue
 				}
 
+				move := msg.Player.Mark + " " + msg.Payload
+				message := NewMessage(nil, utils.MOVE, move)
+				g.messagePlayers(message)
+
 				if len(res.Winner) > 0 {
 					message := NewMessage(nil, utils.GAME_OVER, utils.WINNER_TITLE+" "+res.Winner)
-					g.Player1.SendMessage(message)
-					g.Player2.SendMessage(message)
+					g.messagePlayers(message)
 					return nil
 				} else if res.IsDraw {
 					message := NewMessage(nil, utils.GAME_OVER, utils.DRAW)
-					g.Player1.SendMessage(message)
-					g.Player2.SendMessage(message)
+					g.messagePlayers(message)
 					return nil
-				} else if msg.Player == g.Player1 {
-					message := NewMessage(nil, utils.MOVE, msg.Payload)
-					g.Player2.SendMessage(message)
-				} else {
-					message := NewMessage(nil, utils.MOVE, msg.Payload)
-					g.Player1.SendMessage(message)
 				}
 			}
 
@@ -99,6 +95,11 @@ func (g *Game) Start() error {
 		}
 	}
 	return nil
+}
+
+func (g *Game) messagePlayers(msg *Message) {
+	g.Player1.SendMessage(msg)
+	g.Player2.SendMessage(msg)
 }
 
 func (g *Game) endGame() {

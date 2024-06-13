@@ -1,21 +1,23 @@
 package utils
 
 const (
-	// Game states
-	OK                        = "OK"
-	START                     = "START"
-	DRAW                      = "DRAW"
-	GAME_OVER                 = "GAME OVER"
-	WINNER_TITLE              = "WINNER"
-	OPPONENT_DISCONNECTED_WIN = "Opponent disconnected. You win!"
+	// Mark
+	X = "X"
+	O = "O"
 
-	// Player message types
-	INIT_GAME    = "init_game"
-	MOVE         = "move"
-	DISCONNECTED = "disconnected"
-	ERROR        = "error"
+	// Message type
+	INIT_GAME    = "INIT GAME"
+	START        = "START"
+	MOVE         = "MOVE"
+	DRAW         = "DRAW"
+	GAME_OVER    = "GAME OVER"
+	OK           = "OK"
+	ERROR        = "ERROR"
 	WAITING      = "WAITING"
+	DISCONNECTED = "DISCONNECTED"
 
-	// Player statuses
-	WAITING_FOR_OPPONENT = "WAITING FOR OPPONENT"
+	// Messages
+	WINNER_TITLE              = "Winner"
+	OPPONENT_DISCONNECTED_WIN = "Opponent disconnected. You win!"
+	WAITING_FOR_OPPONENT      = "Waiting for opponent"
 )
