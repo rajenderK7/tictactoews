@@ -22,14 +22,14 @@ var gm = gamemanager.New()
 func main() {
 	e := echo.New()
 
-	e.GET("/ws", func(c echo.Context) error {
+	e.GET("/new-game", func(c echo.Context) error {
 		// Upgrade HTTP to Websocket.
 		ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		gm.NewGame(ws)
-		return nil
+		return c.JSON(http.StatusSwitchingProtocols, "new game initiated")
 	})
 
 	e.Start("localhost:4000")
