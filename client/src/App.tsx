@@ -5,8 +5,7 @@ import Cell from "./components/Cell";
 
 const Game = () => {
   const [playerMark, setPlayerMark] = useState<string>(Mark.X);
-  // const [opponentMark, setOpponentMark] = useState<string>(Mark.O);
-  const [playerTurn, setPlayerTurn] = useState<boolean>(true);
+  const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [msg, setMsg] = useState<string>("");
   const [board, setBoard] = useState<string[][]>([
     ["", "", ""],
@@ -31,30 +30,16 @@ const Game = () => {
   const clearMsg = () => {
     setMsg("");
   };
-
-  const switchTurn = () => {
-    setPlayerTurn((prev) => !prev);
-  };
-
   const handleWaiting = ({ payload }: Message) => {
     updateMsg(payload);
   };
 
   const handleStart = ({ payload }: Message) => {
     setPlayerMark(payload);
-    if (payload === Mark.X) {
-      setPlayerTurn(true);
-    } else {
-      setPlayerTurn(false);
-    }
+    setIsGameOver(false);
   };
 
   const handleMove = (rowIdx: number, colIdx: number) => {
-    // if (!playerTurn) {
-    //   console.log("Inside");
-    //   return;
-    // }
-    switchTurn();
     GameInstance.sendMessage(MessageType.MOVE, `${rowIdx} ${colIdx}`);
   };
 
@@ -67,7 +52,6 @@ const Game = () => {
 
     clearMsg();
     updateBoard(mark, rowIdx, colIdx);
-    switchTurn();
   };
 
   const handleError = ({ payload }: Message) => {
@@ -76,15 +60,14 @@ const Game = () => {
 
   const handleGameOver = ({ payload }: Message) => {
     updateMsg(payload);
-    GameInstance.sendMessage("MOVE", "0 0");
+    setIsGameOver(true);
   };
 
   const handleRefresh = () => {
-    GameInstance.sendMessage(MessageType.INIT_GAME, "");
+    window.location.reload();
   };
 
   useEffect(() => {
-    // GameInstance.addCallback(MessageType.INIT_GAME, handleInitGame);
     GameInstance.addCallback(MessageType.START, handleStart);
     GameInstance.addCallback(MessageType.WAITING, handleWaiting);
     GameInstance.addCallback(MessageType.MOVE, handleRecieveMove);
@@ -97,32 +80,40 @@ const Game = () => {
   }, []);
 
   return (
-    <div className="text-xl font-bold text-center">
-      <h1>{playerMark}</h1>
-      {msg.length > 0 && <p>{msg}</p>}
-      {/* <button onClick={handleRefresh}>Refresh</button> */}
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-4xl font-bold mb-8">Tic Tac Toe</h1>
-        <div className="flex flex-col justify-center items-center border-2 border-black shadow-xl">
-          {board.map((row, rowIdx) => {
-            return (
-              <div key={rowIdx} className="flex justify-evenly w-full">
-                {row.map((mark, colIdx) => {
-                  return (
-                    <Cell
-                      key={`${rowIdx}-${colIdx}`}
-                      onClick={handleMove}
-                      mark={mark}
-                      rowIdx={rowIdx}
-                      colIdx={colIdx}
-                    />
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <h1 className="text-4xl font-bold mb-2 text-pink-700">Tic Tac Toe</h1>
+      <div className="text-xl font-semibold text-gray-800 mb-4">
+        Your Mark:{" "}
+        <span className="text-green-600 font-bold">{playerMark}</span>
       </div>
+      {msg.length > 0 && (
+        <p className="text-white bg-black px-4 py-1 rounded mb-6 shadow-md">
+          {msg}
+        </p>
+      )}
+      <div className="flex flex-col items-center border-2 border-black shadow-xl bg-white">
+        {board.map((row, rowIdx) => (
+          <div key={rowIdx} className="flex">
+            {row.map((mark, colIdx) => (
+              <Cell
+                key={`${rowIdx}-${colIdx}`}
+                onClick={handleMove}
+                mark={mark}
+                rowIdx={rowIdx}
+                colIdx={colIdx}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      {isGameOver && (
+        <button
+          onClick={handleRefresh}
+          className="mt-4 px-3 py-2 bg-gray-600 text-white rounded shadow-md hover:bg-gray-700 transition-colors"
+        >
+          Refresh ↻
+        </button>
+      )}
     </div>
   );
 };
