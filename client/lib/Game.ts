@@ -1,4 +1,5 @@
-const WEBSOCKET_URL = "ws://localhost:4000/new-game";
+const WEBSOCKET_URL = import.meta.env.VITE_WS_URL;
+const NEW_GAME_ENDPOINT = WEBSOCKET_URL + import.meta.env.VITE_WS_NEW_GAME_PATH;
 
 export interface Message {
   type: string;
@@ -32,7 +33,7 @@ class Game {
   }
 
   constructor() {
-    this.socket = new WebSocket(WEBSOCKET_URL);
+    this.socket = new WebSocket(NEW_GAME_ENDPOINT);
     this.callbacks = new Map<string, CallbackFn>();
     this.attachHandlers();
   }
