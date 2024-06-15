@@ -29,7 +29,7 @@ func main() {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		gm.NewGame(ws)
-		return c.JSON(http.StatusSwitchingProtocols, "new game initiated")
+		return nil
 	})
 
 	e.Start("localhost:4000")
