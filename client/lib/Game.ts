@@ -39,6 +39,7 @@ class Game {
   }
 
   private attachHandlers = () => {
+    // @ts-ignore
     this.socket.onopen = (ev) => {
       console.log("Connected to the WebSocket server");
     };
@@ -47,6 +48,7 @@ class Game {
       this.socketNewMessage(JSON.parse(ev.data) as Message);
     };
 
+    // @ts-ignore
     this.socket.onclose = (ev) => {
       console.log("Disconnected from the WebSocket server");
     };
