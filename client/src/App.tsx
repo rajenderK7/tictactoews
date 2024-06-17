@@ -36,6 +36,7 @@ const Game = () => {
 
   const handleStart = ({ payload }: Message) => {
     setPlayerMark(payload);
+    clearMsg();
     setIsGameOver(false);
   };
 
