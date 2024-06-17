@@ -1,0 +1,22 @@
+services:
+  server:
+    # context: ./server
+    # dockerfile: Dockerfile
+    image: tictactoews:v1.0
+    ports:
+      - "4000:4000"
+    networks:
+      - ttt-network
+
+  client:
+    # context: ./client
+    # dockerfile: Dockerfile
+    image: tictactoeclient:v1.0
+    ports:
+      - "3000:80"
+    networks:
+      - ttt-network
+
+networks:
+  ttt-network:
+    driver: bridge
