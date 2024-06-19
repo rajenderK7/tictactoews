@@ -12,6 +12,8 @@ import (
 	gamemanager "github.com/rajenderK7/tictactoews/internal/game_manager"
 )
 
+const DEFAULT_PORT = ":4000"
+
 var (
 	upgrader = websocket.Upgrader{
 		// Allow all origins for simplicity.
@@ -22,6 +24,13 @@ var (
 )
 
 var gm = gamemanager.New()
+
+func getPort() string {
+	if port := os.Getenv("PORT"); port != "" {
+		return ":" + port
+	}
+	return DEFAULT_PORT
+}
 
 func main() {
 	e := echo.New()
@@ -41,7 +50,7 @@ func main() {
 
 	// Start server
 	go func() {
-		if err := e.Start(":4000"); err != nil && err == http.ErrServerClosed {
+		if err := e.Start(getPort()); err != nil && err == http.ErrServerClosed {
 			e.Logger.Fatal("shutting down the server")
 		}
 	}()
